@@ -1,0 +1,36 @@
+-- SET statement_timeout = 0;
+-- SET lock_timeout = 0;
+-- SET idle_in_transaction_session_timeout = 0;
+-- SET client_encoding = 'UTF8';
+-- SET standard_conforming_strings = on;
+-- SELECT pg_catalog.set_config('search_path', '', false);
+-- SET check_function_bodies = false;
+-- SET xmloption = content;
+-- SET client_min_messages = warning;
+-- SET row_security = off;
+-- CREATE EXTENSION IF NOT EXISTS pgsodium;
+-- DROP TABLE IF EXISTS my_secrets CASCADE;
+-- CREATE TABLE my_secrets (
+--   secret text
+-- );
+-- -- DO $$
+-- -- DECLARE label UUID;
+-- -- SELECT id FROM pgsodium.create_key();
+-- -- SECURITY LABEL FOR pgsodium ON COLUMN my_secrets.secret IS :label;
+-- -- SELECT objoid::regclass, provider, label FROM pg_seclabel WHERE provider = 'pgsodium';
+-- -- $$;
+-- do $$
+-- declare
+--    test uuid;
+-- begin
+--    -- select the number of actors from the actor table
+--    select id
+--    into test
+--    from pgsodium.create_key();
+
+--    -- show the number of actors
+--    raise notice 'The number of actors: %', test;
+--    SECURITY LABEL FOR pgsodium ON COLUMN my_secrets.secret IS test;
+-- end; $$
+
+CREATE EXTENSION IF NOT EXISTS pgsodium;

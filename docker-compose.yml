@@ -1,0 +1,45 @@
+version: "3.9"
+
+volumes:
+  postgres_storage:
+    driver: local
+
+networks:
+  app:
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:local
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: 'always'
+    environment:
+      POSTGRES_PASSWORD: postgres
+      TZ: "Europe/Warsaw"
+      # POSTGRES_EXTENSIONS: pgsodium
+    healthcheck:
+      test: 'pg_isready --username=postgres && psql --username=postgres -c "SELECT * FROM postgres.pg_catalog.pg_database;"'
+      retries: 20
+      interval: 3s
+      timeout: 5s
+      start_period: 5s
+    # command: "/bin/sh -c 'apt-get upgrade && apt-get update &&  apt-get install gcc make libsodium-dev pgxnclient -y'"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init/:/docker-entrypoint-initdb.d/:ro
+      - ./pgsodium_getkey.sh/:/usr/share/postgresql/15/extension/pgsodium_getkey/:ro
+    networks:
+      - app
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - 8080:8080
+    networks:
+      - app
