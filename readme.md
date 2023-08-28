@@ -40,7 +40,7 @@ SELECT * FROM decrypted_my_secrets;
 DROP TABLE IF EXISTS my_customers_data CASCADE; 
 CREATE TABLE my_customers_data ( 
     id bigserial, 
-    secret_data text, -- Key which is provided by a client
+    secret_data text, -- data to be encrypted
     key_id uuid REFERENCES pgsodium.key(id) DEFAULT (pgsodium.create_key()).id, 
     nonce bytea DEFAULT pgsodium.crypto_aead_det_noncegen()
 );
@@ -67,4 +67,19 @@ SELECT secret_data, key_id FROM my_customers_data;
 3. Get decrypted data
 ```
 SELECT decrypted_secret_data as secret_data, key_id FROM decrypted_my_customers_data;
+```
+
+# Generating keys strategies
+
+## Key can be created using any arbitrary string for example user password hashed in sha256 (keep in mind that if user changes his password there may be need to migrate his data to use new key)
+```
+select * from pgsodium.create_key(raw_key:=digest('userPassword', 'sha256'));
+```
+## Key can specify parent key which will be using for encryption (e.g. parent_key may allow to group users)
+```
+select * from pgsodium.create_key(raw_key:=digest('userPassword', 'sha256'),parent_key:='e707f48c-8ce6-471c-88ee-f1b0c9be1517');
+```
+## Each key can store additional information which is not encrypted, for example to identify user which uses this key
+```
+select * from pgsodium.create_key(raw_key:=digest('userPassword', 'sha256'),parent_key:='e707f48c-8ce6-471c-88ee-f1b0c9be1517',associated_data:='{"clientName":"someClientName"}');
 ```
